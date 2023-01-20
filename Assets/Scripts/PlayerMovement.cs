@@ -2,12 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Cinemachine;
 
 public class PlayerMovement : MonoBehaviour
 {
   [SerializeField] float runSpeed = 10f;
   [SerializeField] float jumpSpeed = 5f;
   [SerializeField] float climbSpeed = 5f;
+  [SerializeField] Vector2 deathKick = new Vector2(10f, 10f);
 
   Vector2 moveInput;
   Rigidbody2D myRigidbody;
@@ -15,6 +17,8 @@ public class PlayerMovement : MonoBehaviour
   CapsuleCollider2D myBodyCollider;
   BoxCollider2D myFeetCollider;
   float gravityScaleAtStart;
+  bool isAlive = true;
+  private CinemachineImpulseSource _myImpulseSource;
 
   void Start()
   {
@@ -23,17 +27,21 @@ public class PlayerMovement : MonoBehaviour
     myBodyCollider = GetComponent<CapsuleCollider2D>();
     myFeetCollider = GetComponent<BoxCollider2D>();
     gravityScaleAtStart = myRigidbody.gravityScale;
+    _myImpulseSource = GetComponent<CinemachineImpulseSource>();
   }
 
   void Update()
   {
+    if (!isAlive) { return; }
     Run();
     FlipSprite();
     ClimbLadder();
+    Die();
   }
 
   void OnMove(InputValue value)
   {
+    if (!isAlive) { return; }
     moveInput = value.Get<Vector2>();
     Debug.Log(moveInput);
   }
@@ -41,7 +49,7 @@ public class PlayerMovement : MonoBehaviour
   void OnJump(InputValue value)
   {
 
-    if (!myFeetCollider.IsTouchingLayers(LayerMask.GetMask("Ground"))) { return; }
+    if (!myFeetCollider.IsTouchingLayers(LayerMask.GetMask("Ground")) || !isAlive) { return; }
 
     if (value.isPressed)
     {
@@ -84,5 +92,16 @@ public class PlayerMovement : MonoBehaviour
     bool playerHasVerticalSpeed = Mathf.Abs(myRigidbody.velocity.y) > Mathf.Epsilon;
 
     myAnimator.SetBool("isClimbing", playerHasVerticalSpeed);
+  }
+
+  void Die()
+  {
+    if (myBodyCollider.IsTouchingLayers(LayerMask.GetMask("Enemies")))
+    {
+      isAlive = false;
+      myAnimator.SetTrigger("Dying");
+      _myImpulseSource.GenerateImpulse(1);
+      myRigidbody.velocity = deathKick;
+    }
   }
 }
