@@ -45,7 +45,7 @@ public class PlayerMovement : MonoBehaviour
   {
     if (!isAlive) { return; }
     moveInput = value.Get<Vector2>();
-    Debug.Log(moveInput);
+    // Debug.Log(moveInput);
   }
 
   void OnJump(InputValue value)
@@ -98,7 +98,6 @@ public class PlayerMovement : MonoBehaviour
     myRigidbody.gravityScale = 0;
 
     bool playerHasVerticalSpeed = Mathf.Abs(myRigidbody.velocity.y) > Mathf.Epsilon;
-
     myAnimator.SetBool("isClimbing", playerHasVerticalSpeed);
   }
 
