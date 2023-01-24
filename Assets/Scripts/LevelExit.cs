@@ -23,6 +23,7 @@ public class LevelExit : MonoBehaviour
     if (nextSceneIndex != SceneManager.sceneCountInBuildSettings)
     {
       yield return new WaitForSecondsRealtime(levelLoadDelay);
+      FindObjectOfType<ScenePersist>().ResetScenePersist();
       SceneManager.LoadScene(nextSceneIndex);
     }
     else
